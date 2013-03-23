@@ -1,0 +1,178 @@
+﻿<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <title>MongoDb Log Viewer</title>
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link href="//netdna.bootstrapcdn.com/twitter-bootstrap/2.3.1/css/bootstrap-combined.min.css" rel="stylesheet">
+        <link rel="stylesheet" href="//cdn.oesmith.co.uk/morris-0.4.1.min.css">
+        <style>
+            @media (min-width: 980px) { body { padding-top: 50px; } }
+            .axis path,
+            .axis line {
+              fill: none;
+              stroke: #000;
+              shape-rendering: crispEdges;
+            }
+
+            .x.axis path {
+              display: none;
+            }
+
+            .line {
+              fill: none;
+              stroke: steelblue;
+              stroke-width: 1.5px;
+            }   
+            .Info{
+                background-color: #a2a2a2;
+            }   
+            .Error{
+                background-color: #ff3333;
+            }
+            .Warn{
+                background-color: #FF7400;
+            }
+            .Debug{
+                background-color: #f9f780;
+            }
+        </style>
+    </head>
+    <body>
+        <div class="navbar navbar-fixed-top navbar-inverse">
+            <div class="navbar-inner">
+                <div class="container">
+                    <a class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
+                        <span class="icon-bar"></span>
+                        <span class="icon-bar"></span>
+                        <span class="icon-bar"></span>
+                    </a>
+                    <a class="brand" href="#">LogViewer</a>
+                    <div class="nav-collapse collapse">
+                        <ul class="nav">
+                            <li class="dropdown">
+                                <a href="#" role="button" class="dropdown-toggle" data-toggle="dropdown">
+                                    Level <b class="caret"></b>
+                                </a>
+                                <ul class="dropdown-menu" role="menu" aria-labelledby="drop1">
+                                    <li><a href="#debug/1">Debug</a></li>
+                                    <li><a href="#info/1">Info</a></li>
+                                    <li><a href="#warn/1">Warn</a></li>
+                                    <li><a href="#error/1">Error</a></li>
+                                    <li><a href="#fatal/1">Fatal</a></li>
+                                </ul>
+                            </li>
+                            <li><a href="#dashboard">Dashboard</a></li>
+                        </ul>                        
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="container">
+            <div class="js-view js-detail"></div>
+        </div>
+
+        <script type="text/template" id="template-index">
+            <ul class="pager">
+                <li class="previous">
+                    <a class="js-prev" href="#">&larr; Newer</a>
+                </li>
+                <li class="next">
+                    <a class="js-next" href="#">Older &rarr;</a>
+                </li>
+            </ul>
+            <table class="table table-bordered table-striped">
+                <tbody>                 
+                </tbody>
+            </table>
+            <!--double-->
+            <ul class="pager">
+                <li class="previous">
+                    <a class="js-prev" href="#">&larr; Newer</a>
+                </li>
+                <li class="next">
+                    <a class="js-next" href="#">Older &rarr;</a>
+                </li>
+            </ul>            
+        </script>
+
+        <script type="text/template" id="template-top-error-item">
+            <tr>
+                <td>{{_id}}</td>
+                <td>{{count}}</td>
+            </tr>
+        </script>
+
+        <script type="text/template" id="template-dashboard">            
+            <div>
+                <h4>Top Errors Stats</h4>
+                <div class="js-place-for-top-errors-stats"></div>
+            </div>
+            <div class="js-place-for-graph"></div>
+        </script>
+
+        <script type="text/template" id="template-table-row">
+            <tr>            
+                <td>
+                    <div class="media">
+                        <a class="pull-left" href="#log/{{_id}}">
+                            <div style="width:45px;height:45px;" class="{{level}}"></div>
+                        </a>
+                        <div class="media-body" style="position:relative;">
+                            <h4 class="media-heading">{{level}}</h4>
+                            {{{message}}}
+                            {{#exception.message}}
+                            <br>
+                                <span style="word-break:break-all;" class="muted">
+                                    {{exception.message}}
+                                </span>
+                            {{/exception.message}}
+                            <span class="pull-right" style="position:absolute; top:0px; right:0px;" data-toggle="tooltip" data-placement="bottom" title="{{timestamp}}">{{fromNow}}</span>
+                        </div>
+                    </div>
+                </td>
+            </tr>
+        </script>
+
+        <script type="text/template" id="template-detail">
+        	<div>
+			    <p>{{timestamp}} ({{fromNow}})</p>
+			    <p>{{className}}</p>
+			    <b>Method:</b>
+			    <p>{{method}} at line: {{lineNumber}}</p>
+			    <b>Message:</b>
+			    <p>{{{message}}}</p>
+                {{#exception}}
+                    <b>Exception:</b>
+                    <p>{{exception.message}}</p>
+                    <p>{{exception.source}}</p>
+                    {{#exception.stackTrace}}
+                        <pre class="prettyprint">
+                            {{exception.stackTrace}}
+                        </pre>
+                    {{/exception.stackTrace}}
+                    {{#exception.innerException}}
+                        <b>Inner Exception:</b>
+                        <p>{{exception.innerException.message}}</p>
+                        <p>{{exception.innerException.source}}</p>
+                        <pre>{{exception.innerException.stackTrace}}</pre>
+                    {{/exception.innerException}}
+                {{/exception}}
+			    
+			</div>
+        </script>
+        <script src="//cdnjs.cloudflare.com/ajax/libs/jquery/1.9.0/jquery.min.js"></script>
+        <script src="//cdnjs.cloudflare.com/ajax/libs/underscore.js/1.4.4/underscore-min.js"></script>
+        <script src="//cdnjs.cloudflare.com/ajax/libs/json2/20110223/json2.js"></script>
+        <script src="//cdnjs.cloudflare.com/ajax/libs/backbone.js/0.9.9/backbone-min.js"></script>
+        <script src="//cdnjs.cloudflare.com/ajax/libs/jqueryui/1.9.1/jquery-ui.min.js"></script>
+        <script src="//netdna.bootstrapcdn.com/twitter-bootstrap/2.3.0/js/bootstrap.min.js"></script>
+        <script src="//cdnjs.cloudflare.com/ajax/libs/moment.js/1.7.2/moment.min.js"></script>
+        <script src="//cdnjs.cloudflare.com/ajax/libs/moment.js/1.7.2/lang/ru.js"></script>
+        <script src="//cdnjs.cloudflare.com/ajax/libs/raphael/2.1.0/raphael-min.js"></script>
+        <script src="//cdn.oesmith.co.uk/morris-0.4.1.min.js"></script>
+        <script src="//twitter.github.com/hogan.js/builds/2.0.0/hogan-2.0.0.js"></script>
+        <script src="app.js"></script>
+    </body>
+</html>
