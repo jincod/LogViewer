@@ -52,7 +52,15 @@
     });  
 
     var ErrorStatsModel = Backbone.Collection.extend({
-        url: "/api/errorstats"
+        initialize: function(options){
+            this.id = options.id;
+        },
+        url: function() {
+            if(this.id)
+                return "/api/errorstats/" + this.id;
+            else
+                return "/api/errorstats";
+        }
     });
 
     var TopErrorsModel = Backbone.Collection.extend({
@@ -87,7 +95,7 @@
                 hoverCallback: function (index, options) {
                     var row = options.data[index];
                     var str = moment(row._id).format('LL');
-                    str += "<br>Ошибок: " + row.value;
+                    str += "<br>Количество: " + row.value;
                     return str;
                 }
             });
@@ -100,7 +108,7 @@
             var self = this;
             $(this.el).html(this.template.render());          
 
-            var errorStatsModel = new ErrorStatsModel();
+            var errorStatsModel = new ErrorStatsModel({});
             errorStatsModel.fetch({
                 success: function(){
                     var errorStatsView = new ErrorStatsView({
@@ -254,6 +262,19 @@
             context.fromNow = moment(context.timestamp).fromNow();
             context.timestamp = moment(context.timestamp).format("HH:mm:ss, D MMMM YYYY");
             $(this.el).html(this.template.render(context));
+
+            var errorStatsModel = new ErrorStatsModel({id : this.model.get("id")}),
+                self = this;
+            errorStatsModel.fetch({
+                success: function(){
+                    var errorStatsView = new ErrorStatsView({
+                        el : self.$el.find(".js-place-for-graph"), 
+                        collection : errorStatsModel
+                    });
+                    errorStatsView.render();
+                }
+            });
+
             return this;
         }
     });   

@@ -136,13 +136,22 @@
         </script>
 
         <script type="text/template" id="template-detail">
-        	<div>
-			    <p>{{timestamp}} ({{fromNow}})</p>
-			    <p>{{className}}</p>
-			    <b>Method:</b>
-			    <p>{{method}} at line: {{lineNumber}}</p>
-			    <b>Message:</b>
-			    <p>{{{message}}}</p>
+            <div>
+        	   <div class="row">
+                    <div class="span4">
+        			    <p>{{timestamp}} ({{fromNow}})</p>
+        			    <p>{{className}}</p>
+        			    <b>Method:</b>
+        			    <p>{{method}} at line: {{lineNumber}}</p>
+        			    <b>Message:</b>
+        			    <p>{{{message}}}</p>
+                    </div>
+                    <div class="span8">
+                        <h4>Stats</h4>
+                        <div class="js-place-for-graph" style="height: 200px;"></div>
+                    </div>
+                </div>
+
                 {{#exception}}
                     <b>Exception:</b>
                     <p>{{exception.message}}</p>

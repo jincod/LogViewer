@@ -17,7 +17,10 @@ app.configure () ->
 
 Schema = mongoose.Schema
 
-Log = new Schema { }, collection: "logs_net"
+Log = new Schema { 
+    message: String,
+    exception: Schema.Types.Mixed,
+}, collection: "logs_net"
 
 LogModel = dbLogs.model 'Log', Log
 
@@ -127,5 +130,35 @@ app.get "/api/errorstats", (req, res) ->
 app.get "/api/gettoperrors", (req, res) ->
     getTopErrors (result) ->
         res.send result
+
+app.get /^\/api\/errorstats\/([0-9a-fA-F]{24})$/, (req, res) ->
+    id = req.params[0]
+    LogModel.findById id, (err, log) ->
+        if log.exception
+            m =
+                "exception.stackTrace": log.exception.stackTrace
+        else
+            m =
+                "message": log.message
+        LogModel.aggregate
+            $match: m
+        ,
+            $group:
+                _id:
+                    dayOfMonth:
+                        $dayOfMonth: "$timestamp"
+                    month:
+                        $month: "$timestamp"
+                    year:
+                        $year: "$timestamp"
+                count: 
+                    $sum: 1
+        ,
+            (err, result) ->
+                for i in result
+                    i._id = new Date(i._id.year, i._id.month, i._id.dayOfMonth)
+                    i.value = i.count
+                    delete i.count
+                res.send result
 
 app.listen 3000
