@@ -1,11 +1,14 @@
 express = require 'express'
 mongoose = require 'mongoose'
+connectAssets = require 'connect-assets'
 
 app = express()
 
 dbLogs = mongoose.createConnection 'mongodb://localhost/logs'
 
 app.configure () ->
+    app.set 'view engine', 'ejs'
+    app.use connectAssets()
     app.use express.bodyParser()
     app.use express.methodOverride()
     app.use app.router
@@ -23,6 +26,9 @@ Log = new Schema {
 }, collection: "logs_net"
 
 LogModel = dbLogs.model 'Log', Log
+
+app.get '/', (req, res) ->
+    res.render "index"
 
 # one log
 app.get /^\/api\/log\/([0-9a-fA-F]{24})$/, (req, res) ->

@@ -4,6 +4,8 @@
   "private": "true",
   "dependencies": {
     "express": "*",
-    "mongoose": "*"
+    "mongoose": "*",
+    "connect-assets": "*",
+    "ejs": "*"
   }
 }
