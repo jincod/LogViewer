@@ -134,8 +134,7 @@ class BaseView extends Backbone.View
         $(@el).find(".js-prev").prop("href", "#" + level + "/" + (page - 1))
     
     close: ->
-        @off()
-        # $(@el).off()
+        @$el.off()
         @collection.off()
         @eventObject.off "next", @nextPage, @
         @eventObject.off "prev", @prevPage, @
@@ -255,10 +254,12 @@ class window.Router extends Backbone.Router
 
         logs.fetch
             success: ->
-                view = new BaseView
-                    el: $(".js-view")
-                    collection: logs
-                    eventObject: eventObject
+                view =
+                    ctor: BaseView
+                    options:
+                        el: $(".js-view")
+                        collection: logs
+                        eventObject: eventObject
                 self.showView view
     
     log: (id) ->
@@ -267,17 +268,22 @@ class window.Router extends Backbone.Router
         self = @
         m.fetch
             success: ->
-                view = new DetailView
-                    el: $(".js-detail")
-                    model: m
+                view =
+                    ctor: DetailView
+                    options:
+                        el: $(".js-detail")
+                        model: m
                 self.showView view
 
     dashboard: ->
         showSpinner()
-        view = new DashboardView el: $(".js-detail")
+        view =
+            ctor: DashboardView
+            options:
+                el: $(".js-detail")
         @showView view
 
     showView: (view) ->
         @currentView.close() if @currentView?.close
-        @currentView = view
+        @currentView = new view.ctor(view.options)
         @currentView.render()
