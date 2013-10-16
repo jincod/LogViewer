@@ -5,7 +5,7 @@
         <title>MongoDb Log Viewer</title>
         <meta http-equiv="X-UA-Compatible" content="IE=edge">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <link href="//netdna.bootstrapcdn.com/bootstrap/3.0.0-rc1/css/bootstrap.min.css" rel="stylesheet">
+        <link href="//netdna.bootstrapcdn.com/bootstrap/3.0.0/css/bootstrap.min.css" rel="stylesheet">
         <link rel="stylesheet" href="//cdn.oesmith.co.uk/morris-0.4.1.min.css">
         <style>
             @media (min-width: 980px) { body { padding-top: 50px; } }
@@ -37,18 +37,25 @@
             .Debug{
                 background-color: #f9f780;
             }
+            .media{
+                padding: 8px;
+                border: 1px solid #dddddd;
+            }
         </style>
     </head>
     <body>
-        <div class="navbar navbar-fixed-top navbar-inverse">
+        <div class="navbar navbar-default navbar-fixed-top navbar-inverse" role="navigation">
             <div class="container">
-                <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-responsive-collapse">
-                    <span class="icon-bar"></span>
-                    <span class="icon-bar"></span>
-                    <span class="icon-bar"></span>
-                </button>
-                <a class="navbar-brand" href="#">LogViewer</a>
-                <div class="nav-collapse collapse">
+                <div class="navbar-header">
+                    <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-ex1-collapse">
+                        <span class="sr-only">Toggle navigation</span>
+                        <span class="icon-bar"></span>
+                        <span class="icon-bar"></span>
+                        <span class="icon-bar"></span>
+                    </button>
+                    <a class="navbar-brand" href="#">LogViewer</a>
+                </div>
+                <div class="collapse navbar-collapse navbar-ex1-collapse">
                     <ul class="nav navbar-nav">
                         <li class="dropdown">
                             <a href="#" role="button" class="dropdown-toggle" data-toggle="dropdown">
@@ -80,19 +87,7 @@
                     <a class="js-next" href="#">Older &rarr;</a>
                 </li>
             </ul>
-            <table class="table table-bordered table-striped">
-                <tbody>                 
-                </tbody>
-            </table>
-            <!--double-->
-            <ul class="pager">
-                <li class="previous">
-                    <a class="js-prev" href="#">&larr; Newer</a>
-                </li>
-                <li class="next">
-                    <a class="js-next" href="#">Older &rarr;</a>
-                </li>
-            </ul>            
+             <div class="js-place-for-content"></div>
         </script>
 
         <script type="text/template" id="template-top-error-item">
@@ -102,7 +97,7 @@
             </tr>
         </script>
 
-        <script type="text/template" id="template-dashboard">            
+        <script type="text/template" id="template-dashboard">
             <div>
                 <h4>Top Errors Stats</h4>
                 <div class="js-place-for-top-errors-stats"></div>
@@ -111,26 +106,23 @@
         </script>
 
         <script type="text/template" id="template-table-row">
-            <tr>            
-                <td>
-                    <div class="media">
-                        <a class="pull-left" href="#log/{{_id}}">
-                            <div style="width:45px;height:45px;" class="{{level}}"></div>
-                        </a>
-                        <div class="media-body" style="position:relative;">
-                            <h4 class="media-heading">{{level}}</h4>
-                            {{{message}}}
-                            {{#exception.message}}
-                            <br>
-                                <span style="word-break:break-all;" class="muted">
-                                    {{exception.message}}
-                                </span>
-                            {{/exception.message}}
-                            <span class="pull-right" style="position:absolute; top:0px; right:0px;" data-toggle="tooltip" data-placement="bottom" title="{{timestamp}}">{{fromNow}}</span>
-                        </div>
+            <div class="media {{#isFixed}}fixed{{/isFixed}}">
+                <a class="pull-left" href="#log/{{_id}}">
+                    <div style="width:45px;height:45px;" class="{{level}}"></div>
+                </a>
+                <div class="media-body" style="position:relative;">
+                    <h4 class="media-heading">{{level}}</h4>
+                    <div>
+                        {{{message}}}
                     </div>
-                </td>
-            </tr>
+                    {{#exception.message}}
+                        <span style="word-break:break-all;" class="muted">
+                            {{exception.message}}
+                        </span>
+                    {{/exception.message}}
+                    <span class="pull-right" style="position:absolute; top:0px; right:0px;" data-toggle="tooltip" data-placement="bottom" title="{{timestampPretty}}" data-time="{{timestamp}}">{{fromNow}}</span>
+                </div>
+            </div>
         </script>
 
         <script type="text/template" id="template-detail">
@@ -166,20 +158,18 @@
                         <pre>{{exception.innerException.stackTrace}}</pre>
                     {{/exception.innerException}}
                 {{/exception}}
-			    
-			</div>
+            </div>
         </script>
-        <script src="//cdnjs.cloudflare.com/ajax/libs/jquery/1.9.0/jquery.min.js"></script>
+        <script src="//cdnjs.cloudflare.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
         <script src="//cdnjs.cloudflare.com/ajax/libs/underscore.js/1.4.4/underscore-min.js"></script>
-        <script src="//cdnjs.cloudflare.com/ajax/libs/json2/20110223/json2.js"></script>
-        <script src="//cdnjs.cloudflare.com/ajax/libs/backbone.js/0.9.9/backbone-min.js"></script>
-        <script src="//cdnjs.cloudflare.com/ajax/libs/jqueryui/1.9.1/jquery-ui.min.js"></script>
-        <script src="//netdna.bootstrapcdn.com/bootstrap/3.0.0-rc1/js/bootstrap.min.js"></script>
-        <script src="//cdnjs.cloudflare.com/ajax/libs/moment.js/1.7.2/moment.min.js"></script>
-        <script src="//cdnjs.cloudflare.com/ajax/libs/moment.js/1.7.2/lang/ru.js"></script>
+        <script src="//cdnjs.cloudflare.com/ajax/libs/json2/20121008/json2.js"></script>
+        <script src="//cdnjs.cloudflare.com/ajax/libs/backbone.js/1.0.0/backbone-min.js"></script>
+        <script src="//cdnjs.cloudflare.com/ajax/libs/jqueryui/1.10.2/jquery-ui.min.js"></script>
+        <script src="//netdna.bootstrapcdn.com/bootstrap/3.0.0/js/bootstrap.min.js"></script>
+        <script src="//cdnjs.cloudflare.com/ajax/libs/moment.js/2.3.1/moment.min.js"></script>
         <script src="//cdnjs.cloudflare.com/ajax/libs/raphael/2.1.0/raphael-min.js"></script>
         <script src="//cdn.oesmith.co.uk/morris-0.4.1.min.js"></script>
-        <script src="//twitter.github.com/hogan.js/builds/2.0.0/hogan-2.0.0.js"></script>
+        <script src="//twitter.github.io/hogan.js/builds/2.0.0/hogan-2.0.0.js"></script>
         <%- js('app') %>
         <%- js('main') %>
     </body>

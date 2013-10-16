@@ -96,7 +96,7 @@ class BaseView extends Backbone.View
         c.level = c.level.replace /\w\S*/g, (txt) ->
             return txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase()
         html += self.templates["row"].render(c)
-        $(@el).find("tbody").prepend html
+        $(@el).find(".js-place-for-content").prepend html
         $(@el).find("span[data-toggle='tooltip']").tooltip()
         this
 
@@ -109,7 +109,7 @@ class BaseView extends Backbone.View
             c = self.extendContext(c)
             html += self.templates["row"].render(c)
 
-        $(this.el).find("tbody").html(html)
+        $(this.el).find(".js-place-for-content").html(html)
         $(@el).find("span[data-toggle='tooltip']").tooltip()
         @changeNavButtonUrl();            
         this
